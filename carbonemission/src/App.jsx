@@ -2,7 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Homepage from './components/Homepage/Homepage';
-import Login_opt from './components/Login/Login_opt/Login_opt'
+import Login_opt from './components/Login/Login_opt/Login_opt';
+import Adminlogin from './components/Login/Adminlogin/Adminlogin';
+import AdministratorLogin from './components/Login/AdministratorLogin/AdministratorLogin';
+import AdministratorSignup from './components/Login/AdministratorSignup/AdministratorSignup';
+import Sectorlogin from './components/Login/Sectorlogin/Sectorlogin';
+
 import './App.css';
 
 function App() {
@@ -13,9 +18,10 @@ function App() {
         <Route path="/" element={<Homepage />} />
         
         <Route path="/" element={<Homepage />} />
+        <Route path="/adminlogin" element={<Adminlogin />} />
         <Route path="/login_opt" element={<Login_opt />} />
-        
-
+        <Route path="/administratorlogin" element={<AdministratorLogin />} />
+        <Route path="/sectorlogin" element={<Sectorlogin />} />
       </Routes>
     </Router>
   );
