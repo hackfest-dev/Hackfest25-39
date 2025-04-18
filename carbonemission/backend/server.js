@@ -175,6 +175,29 @@ app.post('/api/sector-request-password', async (req, res) => {
   }
 });
 
+app.post('/api/sector-reset-password', async (req, res) => {
+  try {
+    const { sector_email, otp, newPassword } = req.body;
+    if (newPassword.length < 8) return res.status(400).json({ error: 'Password too short' });
+
+    const [reset] = await pool.query(
+      'SELECT * FROM sector_password_reset WHERE email = ? AND token = ? AND expires_at > NOW()',
+      [sector_email, otp]
+    );
+    if (!reset.length) return res.status(400).json({ error: 'Invalid or expired OTP' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      'UPDATE sectors SET sector_password = ? WHERE sector_email = ?',
+      [hashedPassword, sector_email]
+    );
+    await pool.query('DELETE FROM sector_password_reset WHERE email = ?', [sector_email]);
+
+    res.json({ message: 'Password set successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Reset failed' });
+  }
+});
 
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
