@@ -1,0 +1,141 @@
+/* Navbar.css */
+:root {
+    --nav-bg: #12263A;
+    --text-color: #ffffff;
+    --accent-color: #539FC3;
+    --hover-bg: #2b5886;
+    --active-bg: #35667D;
+  }
+  
+  /* Navbar.css */
+.navbar {
+  background: var(--nav-bg);
+  padding: 1rem 2rem;
+  position: fixed; /* Change from relative to fixed */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  font-family: sans-serif;
+  transition: box-shadow 0.3s ease; /* Smooth transition for shadow */
+}
+
+/* Add shadow when scrolled */
+.navbar.scrolled {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    
+  }
+  
+  .nav-items {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    background-color: var(--hover-bg);
+  }
+  
+  .nav-link.active {
+    background-color: var(--active-bg);
+    border: 1px solid var(--text-color);
+  }
+  
+  .login-btn {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    text-align: center;
+  }
+  
+  .login-btn:hover {
+    opacity: 0.9;
+  }
+  .logout-btn{
+    background-color: rgb(30, 138, 221);
+    color: var(--text-color);
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    text-align: center;
+  }
+
+  .logout-btn:hover {
+    opacity: 0.9;
+  }
+
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+  }
+  
+  .desktop-login {
+    display: block;
+  }
+  
+  .mobile-login {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .nav-items {
+      position: fixed;
+      top: 86px;
+      left: 0;
+      right: 0;
+      background: var(--nav-bg);
+      flex-direction: column;
+      gap: 1rem;
+      padding: 2rem;
+      transform: translateY(-150%);
+      transition: transform 0.3s ease-out;
+      z-index: 1000;
+    }
+  
+    .nav-items.active {
+      transform: translateY(0);
+    }
+  
+    .menu-toggle {
+      display: block;
+    }
+  
+    .desktop-login {
+      display: none;
+    }
+  
+    .mobile-login {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+    }
+  }
+
+
+  .nav-logo{
+    border-radius: 50%;
+  }
