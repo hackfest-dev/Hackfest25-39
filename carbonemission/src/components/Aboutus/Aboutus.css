@@ -1,0 +1,428 @@
+/* animation */
+/* Add this to your CSS */
+.hidden {
+    opacity: 0;
+    transform: translateY(30px); /* Adjust based on your animation type */
+    transition: all 1.2s ease-out; /* Increased duration from 0.6s to 1.2s */
+  }
+  
+  .show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+/* animation end*/
+
+
+.Aboutus{
+    margin-top: 86px;
+
+}
+
+.abt-sec1{
+	background-image: url('./images/landscape.jpeg');
+    width: 100%;
+    height: 500px;
+    background-size: cover;
+}
+
+.abt-heading{
+    color: white;
+    text-shadow: black 10px 10px 10px;
+    display: flex;
+    margin: auto;
+    font-size: 80px;
+}
+
+.what_we_do{
+    width: 450px;
+    font-size: 70px;
+  background: var(--nav-bg);
+    margin: 3% auto 0 auto;
+    text-align: center;
+    border-radius: 10px;
+    color: white;
+}
+.missi{
+    width: 90%;
+    background: var(--nav-bg);
+    color: white;
+    margin: 2% auto 0 auto;
+    padding: 2%;
+    border-radius: 10px;
+}
+
+.missi p{
+    background-color: white;
+    color: black;
+    font-size: 25px;
+    padding: 1%;
+}
+
+@media (max-width: 500px) {
+.abt-heading{
+    font-size: 40px;
+
+}
+
+.abt-sec1{
+    height: 300px;
+}
+
+.what_we_do{
+    width: 300px;
+    font-size: 40px;
+}
+
+}
+
+.container2{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	width: 100%;
+	height: 120vh;
+	background-color: white;
+	margin: 5% auto 0px auto;
+}
+
+.container2 .corossal1{
+	display: flex;
+	align-items: top;
+	justify-content: center top;
+	width: 50% !important;
+	position: absolute;
+	left: -28%;
+	margin-top: -10%px;
+	/* background-color: rgb(39, 7, 245); */
+}
+
+/* CONTAINER 2 COROSSAL CODE  */
+
+:root {
+	--rotate-speed: 50;
+	--count: 8; /* Default count, the DOM element should override this */
+	--easeInOutSine: cubic-bezier(0.37, 0, 0.63, 1);
+	--easing: cubic-bezier(0.000, 0.37, 1.000, 0.63);
+}
+
+/* body {
+	margin: 0;
+} */
+
+.aboutUs-void {
+	width: 100%;
+	max-width: 1024px;
+	margin: auto;
+	position: relative;
+	aspect-ratio: 1 / 1;
+}
+
+.aboutUs-card-ul:hover * {
+	animation-play-state: paused;
+}
+
+.aboutUs-crop ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	/* position: relative; */
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	background-color:white;
+	z-index:1 !important;
+}
+
+.aboutUs-card-li{
+	position: absolute;
+	width: auto;
+	height: auto;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 100%;
+	animation: rotateCW calc(var(--rotate-speed) * 1s) var(--easing) infinite;
+}
+
+.aboutUs-card {
+	width: 38%;
+	height: 100px;
+	display: flex;
+	text-align: center;
+	flex-direction: column;
+	align-items: flex-column;
+	margin-left: -18%;
+	padding: 8px 16px;
+	gap: 0px;
+	background: #FFF;
+	box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1), 0px 16px 32px rgba(0, 0, 0, 0.1);
+	border-radius: 12px;
+	font-family: 'Inter', sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 17px;
+	color: #6B3F2E;
+	animation: rotateCCW calc(var(--rotate-speed) * 1s) var(--easing) infinite;
+	z-index:1 !important;
+}
+
+.aboutUs-a{
+	text-decoration: none;
+	color: unset;
+}
+
+.model-name {
+	font-weight: 500;
+	font-size: 18px;
+	line-height: 150%;
+	color: #8B4C3D; 
+	display: block;
+}
+
+/* svg {
+	position: absolute;
+	top: 0px;
+	left: 0;
+	z-index: 0;
+} */
+
+.aboutUs-card-li:nth-child(2), .aboutUs-card-li:nth-child(2) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -1s);
+}
+
+.aboutUs-card-li:nth-child(3), .aboutUs-card-li:nth-child(3) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -2s);
+}
+
+.aboutUs-card-li:nth-child(4), .aboutUs-card-li:nth-child(4) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -3s);
+}
+
+.aboutUs-card-li:nth-child(5), .aboutUs-card-li:nth-child(5) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -4s);
+}
+
+.aboutUs-card-li:nth-child(6), .aboutUs-card-li:nth-child(6) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -5s);
+}
+
+.aboutUs-card-li:nth-child(7), .aboutUs-card-li:nth-child(7) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -6s);
+}
+
+.aboutUs-card-li:nth-child(8), .aboutUs-card-li:nth-child(8) .aboutUs-card {
+	animation-delay: calc((var(--rotate-speed)/var(--count)) * -7s);
+}
+
+@keyframes rotateCW {
+	from {
+		transform: translate3d(0px, 80%, -1px) rotate(-45deg);
+	}
+	to {
+		transform: translate3d(20px, -80%, 50px) rotate(-315deg);
+	}
+}
+
+@keyframes rotateCCW {
+	from {
+		transform: rotate(45deg);
+	}
+	to {
+		transform: rotate(315deg);
+	}
+}
+
+@keyframes pulseGlow {
+	from {
+		background-size: 60%;
+	}
+	to {
+		background-size: 100%;
+	}
+}
+
+
+/* corossal circle  */
+
+.corossal-circles{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.center-circle {
+	position: absolute;
+	width: 210px;
+	aspect-ratio: 1 / 1;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(135, 42, 42, 0.2);
+	box-shadow: 0px 18px 36px -18px rgba(12, 5, 46, 0), 
+	            0px 30px 60px -12px rgba(12, 5, 46, 0);
+	border-radius: 50%;
+	clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
+}
+
+
+.second-circle {
+	position: absolute;
+	width: 45%;
+	aspect-ratio: 1 / 1;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(165, 13, 13, 0.2);
+	opacity: 0.5;
+	box-shadow: 0px 18px 36px -18px rgba(12, 5, 46, 0.3), 0px 30px 60px -12px rgba(12, 5, 46, 0.25);
+	border-radius: 50%;
+}
+
+.last-circle {
+	position: absolute;
+	width: 66%;
+	aspect-ratio: 1 / 1;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background: #F9E6E2; 
+	opacity: 0.25;
+	box-shadow: 0px 18px 36px -18px rgba(12, 5, 46, 0.3), 0px 30px 60px -12px rgba(12, 5, 46, 0.25);
+	border-radius: 50%;
+
+}
+
+/* CIRCLE RESPONSIVENESS  */
+
+@media only screen and (max-width: 1262px){
+
+
+	.center-circle {
+		max-width: 30%;
+	}
+
+	.second-circle {
+		max-width: 50%;
+	}
+
+	
+	.last-circle {
+		max-width: 60%;
+	}
+	
+
+}
+
+
+
+.crop {
+	-webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 1));
+}
+
+.vissi{
+    width: 60%;
+    background: var(--nav-bg);
+    color: white;
+    margin: 2% auto 0 35%;
+    padding: 2%;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.vissi p{
+    background-color: white;
+    color: black;
+    font-size: 25px;
+    padding: 1%;
+}
+
+
+
+
+.eissi{
+    width: 90%;
+    background: var(--nav-bg);
+    color: white;
+    margin: 10% auto 0 auto;
+    padding: 2%;
+    border-radius: 10px;
+}
+
+.eissi p{
+    background-color: white;
+    color: black;
+    font-size: 25px;
+    padding: 1%;
+}
+
+
+
+
+@media only screen and (max-width: 1023px){
+	.container2 .corossal1{
+		display: none;
+	}
+    .vissi{
+        width: 90%;
+    margin: 2% auto 0 auto; 
+    }
+}
+
+@media only screen and (max-width: 600px){
+    .vissi{
+        width: 90%;
+    margin: 30% auto 0 auto; 
+    }
+    .eissi{
+        margin-top: 30%;
+    }
+}
+
+@media only screen and (max-width: 485px){
+    .eissi{
+        margin-top: 40%;
+    }
+}
+
+
+@media only screen and (max-width: 470px){
+    .vissi{
+        width: 90%;
+    margin: 50% auto 0 auto; 
+    }
+    .eissi{
+        margin-top: 50% ;
+
+    }
+
+}
+@media only screen and (max-width: 466px){
+    .eissi{
+        margin-top: 60% ;
+
+    }
+}
+
+@media only screen and (max-width: 420px){
+    .vissi{
+        width: 90%;
+    margin: 400px auto 0 auto; 
+    }
+    .eissi{
+        margin-top: 400px ;
+
+    }
+
+}
+
+
+@media only screen and (max-width: 350px){
+    .vissi{
+        width: 90%;
+    margin: 400px auto 0 auto; 
+    }
+    .eissi{
+        margin-top: 500px ;
+
+    }
+
+}
