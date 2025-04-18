@@ -150,6 +150,31 @@ app.post('/api/sector-login', async (req, res) => {
   }
 });
 
+// ============ SECTOR PASSWORD SETUP ============
+app.post('/api/sector-request-password', async (req, res) => {
+  try {
+    const { sector_id, sector_email } = req.body;
+    const [sector] = await pool.query(
+      'SELECT * FROM sectors WHERE sector_id = ? AND sector_email = ?',
+      [sector_id, sector_email]
+    );
+    if (!sector.length) return res.status(404).json({ error: 'Sector not found' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 600000);
+
+    await pool.query(
+      'REPLACE INTO sector_password_reset (email, token, expires_at) VALUES (?, ?, ?)',
+      [sector_email, otp, expiresAt]
+    );
+
+    await sendOTPEmail(sector_email, otp);
+    res.json({ message: 'OTP sent' });
+  } catch (err) {
+    res.status(500).json({ error: 'OTP failed' });
+  }
+});
+
 
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
