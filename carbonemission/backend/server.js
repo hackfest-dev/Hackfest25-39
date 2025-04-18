@@ -103,7 +103,29 @@ app.post('/api/administrator/signup', upload.single('license'), async (req, res)
   }
 });
 
+// ============ ADMINISTRATOR LOGIN ============
+app.post('/api/administrator/login', async (req, res) => {
+  try {
+    const { administrator_id, password } = req.body;
+    const [admin] = await pool.query(
+      'SELECT * FROM approved_administrators WHERE administrator_id = ?',
+      [administrator_id]
+    );
 
+    if (!admin.length || !(await bcrypt.compare(password, admin[0].password_hash))) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    req.session.administrator = {
+      id: admin[0].administrator_id,
+      mine_name: admin[0].mine_name
+    };
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
 
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
