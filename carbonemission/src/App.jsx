@@ -4,7 +4,7 @@ import Navbar from './components/Navbar/Navbar';
 import Homepage from './components/Homepage/Homepage';
 import Login_opt from './components/Login/Login_opt/Login_opt';
 import Adminlogin from './components/Login/Admin/Adminlogin';
-import AdministratorLogin from './components/Login/AdministratorLogin/AdministratorLogin';
+import AdministratorLogin from './components/Login/Administrator/AdministratorLogin';
 import AdministratorSignup from './components/Login/AdministratorSignup/AdministratorSignup';
 import Sectorlogin from './components/Login/Sectorlogin/Sectorlogin';
 
