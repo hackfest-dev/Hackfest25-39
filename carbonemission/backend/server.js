@@ -127,6 +127,30 @@ app.post('/api/administrator/login', async (req, res) => {
   }
 });
 
+// ============ SECTOR LOGIN ============
+app.post('/api/sector-login', async (req, res) => {
+  try {
+    const { sector_id, sector_email, password } = req.body;
+    const [sector] = await pool.query(
+      'SELECT * FROM sectors WHERE sector_id = ? AND sector_email = ?',
+      [sector_id, sector_email]
+    );
+
+    if (!sector.length || !sector[0].sector_password) {
+      return res.status(401).json({ error: 'Invalid credentials or password not set' });
+    }
+
+    const isValid = await bcrypt.compare(password, sector[0].sector_password);
+    if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
+
+    req.session.sector = { id: sector[0].sector_id, email: sector[0].sector_email };
+    res.json({ message: 'Login successful' });
+  } catch (err) {
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
