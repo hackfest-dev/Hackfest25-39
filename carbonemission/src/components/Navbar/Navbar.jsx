@@ -164,7 +164,7 @@ const Navbar = () => {
         <div className="navbar-brand">
           <NavLink to="/">
             <img
-              src="/little_bumblebee.jpg"
+              src="/logo.jpg"
               alt="Logo"
               width={50}
               height={50}
