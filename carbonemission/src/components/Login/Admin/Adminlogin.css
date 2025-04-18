@@ -1,0 +1,98 @@
+.Admin-cont{
+    margin-top: 100px;
+    display: flex;
+    justify-content: center;
+}
+
+
+.log-main-cont{
+    background-color: #E5E5E5;
+    width: 350px;
+    padding: 3%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+}
+.log-main-cont h2{
+    font-size: 30px;
+}
+.box-mai{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    justify-content: center;
+}
+.box-mai button{
+    height: 40px;
+    background-color: #072F58;
+    color: white;
+    width: 100%;
+    height: 45px; /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.inpu-box{
+    background-color: #D9D9D9;
+    padding: 4%;
+    border-radius: 10px;
+    box-shadow: black -5px 5px 5px;
+}
+
+.inpu-box label{
+    font-size: 20px;
+}
+
+.inpu{
+    width: 200px;
+    border-radius: 10px;
+    background-color: white;
+    height: 25px;
+    padding: 2%;
+    border:none;
+}
+
+
+
+
+
+
+  /* Add to spinner styles */
+  .spinner {
+    width: 10px !important;
+    height: 10px !important;
+    border-width: 2px;
+    margin: 0 !important;
+  }
+
+
+  .error-message {
+    color: #dc2626;
+    background-color: #fee2e2;
+    padding: 1rem;
+    border: 2px solid #dc2626;
+    border-radius: 6px;
+    margin: 1rem 0;
+    font-weight: 600;
+    text-align: center;
+    animation: shake 0.3s ease-in-out;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  
+  .success-message {
+    color: #16a34a;
+    background-color: #dcfce7;
+    padding: 1rem;
+    border: 2px solid #16a34a;
+    border-radius: 6px;
+    margin: 1rem 0;
+    font-weight: 600;
+    text-align: center;
+  }
