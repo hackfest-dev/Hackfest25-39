@@ -1,0 +1,337 @@
+/* Administrator Dashboard Specific Styles */
+.admin-dashboard {
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+  margin-top: 6%;
+}
+
+.admin-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.admin-title {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  flex: 1 1 300px;
+}
+
+.admin-year-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-year-selector select {
+  padding: 0.6rem 1.2rem;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-year-selector select:hover {
+  border-color: #2980b9;
+  box-shadow: 0 2px 4px rgba(41, 128, 185, 0.2);
+}
+
+.admin-main-content {
+  display: grid;
+  gap: 2rem;
+}
+
+.admin-chart-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.admin-monthly-summaries {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-month-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.admin-month-card:hover {
+  transform: translateY(-2px);
+}
+
+.admin-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.admin-month-title {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #34495e;
+}
+
+.admin-total-emission {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.admin-submission-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.admin-view-report {
+  padding: 0.5rem 1rem;
+  background: #e8f5e9;
+  border: none;
+  border-radius: 6px;
+  color: #2e7d32;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-view-report:hover {
+  background: #c8e6c9;
+}
+
+.admin-submission-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.admin-file-input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.admin-submit-button {
+  padding: 0.7rem 1.2rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-submit-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.admin-submit-button:not(:disabled):hover {
+  background: #2980b9;
+}
+
+.admin-verification-warning {
+  color: #e67e22;
+  font-size: 0.9rem;
+}
+
+.admin-sectors-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.admin-sector-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  gap: 1rem;
+}
+
+.admin-sector-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 200px;
+}
+
+.admin-sector-id {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.admin-sector-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.admin-sector-emission {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-verify-button {
+  padding: 0.5rem 1rem;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-verify-button.verified {
+  background: #7f8c8d;
+  cursor: default;
+}
+
+.admin-verify-button:not(.verified):hover {
+  background: #219a52;
+}
+
+.admin-reject-button {
+  padding: 0.5rem 1rem;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-reject-button:hover {
+  background: #c0392b;
+}
+
+.admin-view-dashboard-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.admin-view-dashboard-link:hover {
+  text-decoration: underline;
+}
+
+.admin-yearly-summary {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.admin-yearly-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.admin-year-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-bar-container {
+  height: 200px;
+  width: 40px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+  position: relative;
+}
+
+.admin-bar-fill {
+  background: linear-gradient(180deg, #3498db, #2980b9);
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  border-radius: 6px;
+  transition: height 0.5s ease;
+}
+
+.admin-bar-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.admin-bar-value {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  text-align: center;
+}
+
+.admin-loading,
+.admin-error {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 600px;
+}
+
+.admin-error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.admin-success-message {
+  color: #27ae60;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    gap: 1rem;
+  }
+  
+  .admin-title {
+    font-size: 1.5rem;
+  }
+  
+  .admin-main-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-sector-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
