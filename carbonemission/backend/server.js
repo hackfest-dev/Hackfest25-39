@@ -76,6 +76,34 @@ app.post('/api/admin/login', async (req, res) => {
   }
 });
 
+// ============ ADMINISTRATOR SIGNUP ============
+app.post('/api/administrator/signup', upload.single('license'), async (req, res) => {
+  try {
+    const { administrator_id, mine_name, mine_location, mine_type, password } = req.body;
+    if (!req.file) return res.status(400).json({ error: 'License PDF required' });
+
+    const [exists] = await pool.query(
+      `SELECT administrator_id FROM pending_administrators WHERE administrator_id = ?
+       UNION SELECT administrator_id FROM approved_administrators WHERE administrator_id = ?`,
+      [administrator_id, administrator_id]
+    );
+    if (exists.length) return res.status(400).json({ error: 'ID already exists' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query(
+      `INSERT INTO pending_administrators 
+       (administrator_id, mine_name, mine_location, mine_type, password_hash, license_pdf) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [administrator_id, mine_name, mine_location, mine_type, hashedPassword, req.file.buffer]
+    );
+
+    res.status(201).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Signup failed' });
+  }
+});
+
+
 
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
