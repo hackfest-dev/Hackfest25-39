@@ -43,6 +43,7 @@ app.use(cors({
     'http://localhost:5174/',
     'http://localhost:3000',
     'http://192.168.83.122:5173',
+    'http://172.18.6.25:5173',
     'http://192.168.137.1:5173',
     'http://192.168.137.113:5173',
     'http://172.18.5.88:5173'
@@ -1408,24 +1409,24 @@ app.get('/api/offset-pdf/:filename', async (req, res) => {
 // Get offsets for logged-in administrator
 app.get('/api/administrator/offsets', administratorAuth, async (req, res) => {
   try {
-   // In server.js, modify the administrator-offsets endpoint query
-const [offsets] = await pool.query(`
-  SELECT 
-    ao.*,
-    op.file_path AS pdf_path,
-    cc.credits_issued
-  FROM administrator_offsets ao
-  LEFT JOIN offset_pdfs op ON ao.id = op.offset_id
-  LEFT JOIN carbon_credits cc ON ao.id = cc.offset_id
-`);
-    
+    const [offsets] = await pool.query(
+      `SELECT 
+         ao.*,
+         op.file_path AS pdf_path,
+         cc.credits_issued
+       FROM administrator_offsets ao
+       LEFT JOIN offset_pdfs op ON ao.id = op.offset_id
+       LEFT JOIN carbon_credits cc ON ao.id = cc.offset_id
+       WHERE ao.administrator_id = ?
+       ORDER BY ao.year DESC, ao.month DESC`,
+      [req.session.administrator.id]
+    );
     res.json(offsets);
   } catch (error) {
+    console.error(error); // helpful for debugging
     res.status(500).json({ error: 'Failed to fetch offset data' });
   }
 });
-
-
 
 
 
@@ -1453,20 +1454,6 @@ app.get('/api/administrator/carbon-credits', administratorAuth, async (req, res)
 
 
 
-// Get administrator's offsets
-app.get('/api/administrator/offsets', administratorAuth, async (req, res) => {
-  try {
-    const [offsets] = await pool.query(
-      `SELECT * FROM administrator_offsets 
-       WHERE administrator_id = ? 
-       ORDER BY year DESC, month DESC`,
-      [req.session.administrator.id]  // Add this filter
-    );
-    res.json(offsets);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch offset data' });
-  }
-});
 
 // Get administrator's carbon credits
 app.get('/api/administrator/carbon-credits', administratorAuth, async (req, res) => {
@@ -1525,63 +1512,43 @@ app.get('/api/admin/credit-price', adminAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch price settings' });
   }
 });
-// Get available credits after emissions deduction
-app.get('/api/administrator/available-credits', administratorAuth, async (req, res) => {
-  try {
-    const [total] = await pool.query(
-      `SELECT total_credits FROM administrator_credit_totals 
-       WHERE administrator_id = ?`,
-      [req.session.administrator.id]
-    );
-
-    const [emissions] = await pool.query(
-      `SELECT SUM(JSON_EXTRACT(emission_data, '$.total')) AS total 
-       FROM sector_emissions se
-       JOIN sectors s ON se.sector_id = s.sector_id
-       WHERE s.administrator_id = ?`,
-      [req.session.administrator.id]
-    );
-
-    const available = (total[0].total_credits || 0) - (emissions[0].total || 0);
-    res.json({ available: Math.max(available, 0) });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to calculate available credits' });
-  }
-});
 
 // Create marketplace listing
+// Modify the POST /api/marketplace/list endpoint
 app.post('/api/marketplace/list', administratorAuth, async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    
     const { credits, price, month, year } = req.body;
-    
-    // Check available credits
-    const [available] = await connection.query(
-      `SELECT (act.total_credits - COALESCE(SUM(se.emission_data->>"$.total"), 0)) AS available
-       FROM administrator_credit_totals act
-       LEFT JOIN sectors s ON act.administrator_id = s.administrator_id
-       LEFT JOIN sector_emissions se ON s.sector_id = se.sector_id
-       WHERE act.administrator_id = ?
-       GROUP BY act.administrator_id`,
-      [req.session.administrator.id]
+
+    // Get net credits for this month/year
+    const [creditData] = await connection.query(
+      `SELECT COALESCE(SUM(cc.credits_issued), 0) AS total 
+       FROM carbon_credits cc
+       JOIN administrator_offsets ao ON cc.offset_id = ao.id
+       WHERE cc.administrator_id = ? 
+         AND ao.month = ? 
+         AND ao.year = ?`,
+      [req.session.administrator.id, month, year]
     );
 
-    if (!available.length || available[0].available < credits) {
-      throw new Error('Insufficient available credits');
-    }
-
-    // Create listing
-    const [result] = await connection.query(
-      `INSERT INTO marketplace_listings 
-       (administrator_id, credits_available, price_per_credit, month, year)
-       VALUES (?, ?, ?, ?, ?)`,
-      [req.session.administrator.id, credits, price, month, year]
+    const [emissionData] = await connection.query(
+      `SELECT COALESCE(SUM(JSON_EXTRACT(emission_data, '$.total') / 1000, 0) AS emissions
+       FROM sector_emissions se
+       JOIN sectors s ON se.sector_id = s.sector_id
+       WHERE s.administrator_id = ? 
+         AND se.month = ? 
+         AND se.year = ? 
+         AND se.verified = 1`,
+      [req.session.administrator.id, month, year]
     );
 
+    const available = creditData[0].total - emissionData[0].emissions;
+    if (available < credits) throw new Error('Insufficient net credits for this month');
+
+    // Create listing...
     await connection.commit();
-    res.json({ success: true, listingId: result.insertId });
+    res.json({ success: true });
   } catch (error) {
     await connection.rollback();
     res.status(400).json({ error: error.message });
@@ -1667,10 +1634,103 @@ app.get('/api/admin/credit-overview', adminAuth, async (req, res) => {
   }
 });
 
+// server.js - Update /api/administrator/available-credits endpoint
+// Updated /api/administrator/available-credits endpoint
+  // server.js - Available Credits Endpoint
+ // Modify the /api/administrator/available-credits endpoint
+app.get('/api/administrator/available-credits', administratorAuth, async (req, res) => {
+  const { month, year } = req.query;
+  if (!month || !year) return res.status(400).json({ error: 'Month and year required' });
+
+  try {
+    // Get credits for this month/year
+    const [credits] = await pool.query(
+      `SELECT COALESCE(SUM(cc.credits_issued), 0) AS total 
+       FROM carbon_credits cc
+       JOIN administrator_offsets ao ON cc.offset_id = ao.id
+       WHERE cc.administrator_id = ? 
+         AND ao.month = ? 
+         AND ao.year = ?`,
+      [req.session.administrator.id, month, year]
+    );
+
+    // Get emissions for this month/year
+    const [emissions] = await pool.query(
+      `SELECT COALESCE(SUM(JSON_EXTRACT(emission_data, '$.total') / 1000, 0) AS emissions
+       FROM sector_emissions se
+       JOIN sectors s ON se.sector_id = s.sector_id
+       WHERE s.administrator_id = ? 
+         AND se.month = ? 
+         AND se.year = ? 
+         AND se.verified = 1`,
+      [req.session.administrator.id, month, year]
+    );
+
+    const available = credits[0].total - emissions[0].emissions;
+    res.json({ available: Math.max(available, 0) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to calculate credits' });
+  }
+});
 
 
 
+// server.js - Add new endpoint
+app.get('/api/admin/net-credits', adminAuth, async (req, res) => {
+  try {
+    const [data] = await pool.query(`
+      SELECT 
+        a.administrator_id,
+        a.mine_name,
+        COALESCE(act.total_credits, 0) AS total_credits,
+        COALESCE(
+          (SELECT SUM(JSON_EXTRACT(emission_data, '$.total')) 
+          FROM sector_emissions se
+          JOIN sectors s ON se.sector_id = s.sector_id
+          WHERE s.administrator_id = a.administrator_id
+        ), 0) / 1000 AS emissions,
+        COALESCE(act.total_credits, 0) - 
+        (COALESCE(
+          (SELECT SUM(JSON_EXTRACT(emission_data, '$.total')) 
+          FROM sector_emissions se
+          JOIN sectors s ON se.sector_id = s.sector_id
+          WHERE s.administrator_id = a.administrator_id
+        ), 0) / 1000) AS net_available
+      FROM approved_administrators a
+      LEFT JOIN administrator_credit_totals act 
+        ON a.administrator_id = act.administrator_id
+    `);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch net credits' });
+  }
+});
 
+
+// Add this endpoint for credit-emission reconciliation
+app.get('/api/administrator/net-credits', administratorAuth, async (req, res) => {
+  try {
+    const [credits] = await pool.query(
+      `SELECT COALESCE(SUM(credits_issued), 0) AS total_credits
+       FROM carbon_credits 
+       WHERE administrator_id = ?`,
+      [req.session.administrator.id]
+    );
+
+    const [emissions] = await pool.query(
+      `SELECT COALESCE(SUM(JSON_EXTRACT(emission_data, '$.total') / 1000, 0) AS emissions
+       FROM sector_emissions se
+       JOIN sectors s ON se.sector_id = s.sector_id
+       WHERE s.administrator_id = ?`,
+      [req.session.administrator.id]
+    );
+
+    const netCredits = credits[0].total_credits - emissions[0].emissions;
+    res.json({ net_credits: Math.max(netCredits, 0) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to calculate net credits' });
+  }
+});
 
 
 // Error handling middleware at the end
