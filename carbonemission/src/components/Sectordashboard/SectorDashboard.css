@@ -1,0 +1,316 @@
+/* SectorDashboard.css */
+.sector-dashboard {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+}
+/* Add this to the existing SectorDashboard.css */
+.sector-dashboard {
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  margin-top: 7% ;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #2c3e50;
+}
+
+.year-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.year-selector label {
+  font-weight: 600;
+}
+
+.year-selector select {
+  padding: 0.5rem 1rem;
+  border: 2px solid #3498db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.year-selector select:hover {
+  border-color: #2980b9;
+}
+
+.main-content {
+  display: grid;
+  gap: 2rem;
+}
+
+.chart-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.emissions-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.emission-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.emission-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.status-badges {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.verification-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.verification-badge.verified {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.verification-badge.unverified {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.pdf-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-link:hover {
+  text-decoration: underline;
+}
+
+.card-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.metric:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.total-emission {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.total .value {
+  color: #e74c3c;
+  font-size: 1.2rem;
+}
+
+.yearly-summary {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.yearly-bars {
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.year-bar {
+  flex: 0 0 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bar-container {
+  height: 200px;
+  width: 40px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  position: relative;
+  margin: 0.5rem 0;
+}
+
+.bar-fill {
+  background: linear-gradient(180deg, #3498db, #2980b9);
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  border-radius: 6px;
+  transition: height 0.5s ease;
+}
+
+.bar-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.bar-value {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.loading, .error {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  margin: 2rem;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+
+
+.main-content {
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.chart-container {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.emission-card {
+  min-width: 300px;
+}
+
+.card-body {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.yearly-summary {
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.yearly-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 1rem;
+  overflow-x: visible;
+}
+
+.year-bar {
+  width: 100%;
+  min-width: 60px;
+}
+
+/* Modify these existing rules */
+header {
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.year-selector {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.emissions-list {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .sector-dashboard {
+    padding: 2rem;
+  }
+  
+  header {
+    flex-direction: row;
+  }
+  
+  .main-content {
+    grid-template-columns: 2fr 1fr;
+  }
+  
+  .emissions-list {
+    grid-column: 1 / -1;
+  }
+  
+  .yearly-summary {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1200px) {
+  .main-content {
+    grid-template-columns: 3fr 1fr;
+  }
+}

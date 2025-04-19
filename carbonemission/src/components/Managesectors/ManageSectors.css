@@ -1,0 +1,192 @@
+/* Manage Sectors Specific Styles */
+.ms-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-top: 7%;
+  }
+  
+  .ms-container h2 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #3498db;
+    display: inline-block;
+  }
+  
+  .ms-form {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 3rem;
+  }
+  
+  .ms-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .ms-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .ms-form-group label {
+    font-weight: 600;
+    color: #34495e;
+    font-size: 0.95rem;
+  }
+  
+  .ms-form-group input,
+  .ms-form-group select {
+    padding: 0.8rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+  
+  .ms-form-group input:focus,
+  .ms-form-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  }
+  
+  .ms-form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+  }
+  
+  .ms-submit-btn {
+    background: #3498db;
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+    margin-top: 1rem;
+  }
+  
+  .ms-submit-btn:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+  }
+  
+  .ms-message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-weight: 500;
+  }
+  
+  .ms-error-message {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+  }
+  
+  .ms-success-message {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #86efac;
+  }
+  
+  .ms-sectors-list {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .ms-sectors-list h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+  
+  .ms-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+  }
+  
+  .ms-table thead tr {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .ms-table th,
+  .ms-table td {
+    padding: 1rem;
+    text-align: left;
+  }
+  
+  .ms-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+  }
+  
+  .ms-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .ms-table tbody tr:nth-of-type(even) {
+    background-color: #f8f9fa;
+  }
+  
+  .ms-table tbody tr:last-of-type {
+    border-bottom: 2px solid #3498db;
+  }
+  
+  .ms-delete-btn {
+    padding: 0.5rem 1rem;
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .ms-delete-btn:hover {
+    background: #fca5a5;
+    color: #b91c1c;
+  }
+  
+  @media (max-width: 768px) {
+    .ms-table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .ms-container {
+      padding: 0 0.5rem;
+    }
+    
+    .ms-form {
+      padding: 1.5rem;
+    }
+    
+    .ms-submit-btn {
+      max-width: 100%;
+    }
+  }
