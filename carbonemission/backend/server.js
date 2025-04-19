@@ -342,6 +342,106 @@ app.post('/api/emissions/store', emissionsUpload.single('pdf'), async (req, res)
     res.status(500).json({ error: 'Data storage failed' });
   }
 });
+
+
+// ==================== Administrator Dashboard Endpoints ====================
+// Get all sectors' emissions
+app.get('/api/administrator/emissions', administratorAuth, async (req, res) => {
+  try {
+    const [sectors] = await pool.query(
+      'SELECT sector_id, sector_name FROM sectors WHERE administrator_id = ?',
+      [req.session.administrator.id]
+    );
+
+    const sectorsWithEmissions = await Promise.all(
+      sectors.map(async (sector) => {
+        const [emissions] = await pool.query(
+          'SELECT id, month, year, emission_data, verified FROM sector_emissions WHERE sector_id = ?',
+          [sector.sector_id]
+        );
+        return {
+          ...sector,
+          emissions: emissions.map(e => ({
+            id: e.id,
+            month: e.month,
+            year: e.year,
+            total: JSON.parse(e.emission_data).total,
+            verified: e.verified
+          }))
+        };
+      })
+    );
+
+    res.json(sectorsWithEmissions);
+  } catch (error) {
+    console.error('Administrator emissions error:', error);
+    res.status(500).json({ error: 'Failed to fetch emissions data' });
+  }
+});
+
+// Verify emission entry
+app.put('/api/emissions/verify/:entryId', administratorAuth, async (req, res) => {
+  try {
+    const [entry] = await pool.query(
+      `SELECT se.* 
+       FROM sector_emissions se
+       JOIN sectors s ON se.sector_id = s.sector_id
+       WHERE se.id = ? AND s.administrator_id = ?`,
+      [req.params.entryId, req.session.administrator.id]
+    );
+
+    if (!entry.length) return res.status(404).json({ error: 'Entry not found or unauthorized' });
+
+    await pool.query(
+      'UPDATE sector_emissions SET verified = TRUE WHERE id = ?',
+      [req.params.entryId]
+    );
+
+    res.json({ success: true, message: 'Emission entry verified successfully' });
+  } catch (error) {
+    console.error('Verification error:', error);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// Submit monthly report
+app.post('/api/emissions/submit-monthly', administratorAuth, monthlyUpload.single('report'), async (req, res) => {
+  try {
+    const { month, year } = req.body;
+    
+    const [unverified] = await pool.query(
+      `SELECT se.id 
+       FROM sector_emissions se
+       JOIN sectors s ON se.sector_id = s.sector_id
+       WHERE s.administrator_id = ? 
+         AND se.month = ? 
+         AND se.year = ? 
+         AND se.verified = 0`,
+      [req.session.administrator.id, parseInt(month), parseInt(year)]
+    );
+
+    if (unverified.length > 0) {
+      return res.status(400).json({ error: 'All entries must be verified first' });
+    }
+
+    await pool.query(
+      `INSERT INTO monthly_reports 
+       (administrator_id, month, year, report_path)
+       VALUES (?, ?, ?, ?)`,
+      [
+        req.session.administrator.id, 
+        parseInt(month), 
+        parseInt(year), 
+        req.file.filename
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Monthly submission error:', error);
+    res.status(500).json({ error: 'Monthly report submission failed' });
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
