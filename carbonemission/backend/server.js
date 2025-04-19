@@ -199,6 +199,60 @@ app.post('/api/sector-reset-password', async (req, res) => {
   }
 });
 
+
+
+
+// ==================== Manage Sectors Endpoints ====================
+// Get all sectors under administrator
+app.get('/api/manage-sectors', administratorAuth, async (req, res) => {
+  try {
+    const [sectors] = await pool.query(
+      'SELECT * FROM sectors WHERE administrator_id = ?',
+      [req.session.administrator.id]
+    );
+    res.json(sectors);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch sectors' });
+  }
+});
+
+// Create new sector
+app.post('/api/manage-sectors', administratorAuth, async (req, res) => {
+  try {
+    const { sector_id, sector_category, sector_email } = req.body;
+    
+    if (!sector_id || !sector_category || !sector_email) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const [[existingId], [existingEmail]] = await Promise.all([
+      pool.query('SELECT sector_id FROM sectors WHERE sector_id = ?', [sector_id]),
+      pool.query('SELECT sector_id FROM sectors WHERE sector_email = ?', [sector_email])
+    ]);
+
+    if (existingId.length) return res.status(400).json({ error: 'Sector ID already exists' });
+    if (existingEmail.length) return res.status(400).json({ error: 'Email already registered' });
+
+    await pool.query(
+      `INSERT INTO sectors 
+       (sector_id, sector_name, sector_email, administrator_id) 
+       VALUES (?, ?, ?, ?)`,
+      [sector_id, sector_category, sector_email, req.session.administrator.id]
+    );
+    
+    res.status(201).json({ 
+      sector_id,
+      sector_name: sector_category,
+      sector_email,
+      administrator_id: req.session.administrator.id
+    });
+  } catch (error) {
+    console.error('Sector creation error:', error);
+    res.status(500).json({ error: 'Failed to create sector' });
+  }
+});
+
+
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
