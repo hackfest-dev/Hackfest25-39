@@ -46,6 +46,10 @@ const AdministratorMarketplace = () => {
 
   const handleSellCredits = async (e) => {
     e.preventDefault();
+    if (parseFloat(formData.credits) > availableCredits) {
+      setError('Cannot list more credits than available!');
+      return;
+    }
     try {
       const response = await fetch(`${apiBaseURL}/api/marketplace/list`, {
         method: 'POST',
@@ -76,10 +80,11 @@ const AdministratorMarketplace = () => {
         credentials: 'include',
         body: JSON.stringify({ amount })
       });
+      
       if (!response.ok) throw new Error('Purchase failed');
-
-      // Refresh both listings and credits
-      await fetchData();
+      
+      // Force refresh of data
+      await fetchData(); 
     } catch (err) {
       setError(err.message);
     }
