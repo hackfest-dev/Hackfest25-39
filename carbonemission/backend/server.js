@@ -538,6 +538,102 @@ const offsetUpload = multer({
     }
   }
 });
+
+// ==================== Offset Storage Endpoint ====================
+app.post('/api/offset/store', administratorAuth, offsetUpload.single('pdf'), async (req, res) => {
+  try {
+    const { month, year, ...offsetData } = req.body;
+    
+    // Validation
+    const requiredFields = [
+      'tailingsVolume', 'sequestrationRate', 'methaneCaptured',
+      'treesPlanted', 'treeType', 'renewableEnergy', 
+      'ccsCaptured', 'fuelSaved'
+    ];
+    
+    for (const field of requiredFields) {
+      if (!(field in offsetData)) {
+        return res.status(400).json({ error: `Missing field: ${field}` });
+      }
+    }
+
+    // Numerical validation
+    const numericalFields = [
+      'tailingsVolume', 'sequestrationRate', 'methaneCaptured',
+      'treesPlanted', 'renewableEnergy', 'ccsCaptured', 'fuelSaved'
+    ];
+
+    for (const field of numericalFields) {
+      if (isNaN(parseFloat(offsetData[field]))) {
+        return res.status(400).json({ error: `Invalid number format for ${field}` });
+      }
+    }
+
+    // Date validation
+    if (isNaN(month) || isNaN(year)) {
+      return res.status(400).json({ error: 'Invalid month/year format' });
+    }
+
+    // Check existing entries
+    const [existing] = await pool.query(
+      'SELECT id FROM administrator_offsets WHERE administrator_id = ? AND month = ? AND year = ?',
+      [req.session.administrator.id, month, year]
+    );
+    
+    if (existing.length) {
+      return res.status(409).json({ error: 'Offset data already exists for this month' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'PDF report is required' });
+    }
+
+    // Data processing
+    const parsedData = {
+      tailingsVolume: parseFloat(offsetData.tailingsVolume),
+      sequestrationRate: parseFloat(offsetData.sequestrationRate),
+      methaneCaptured: parseFloat(offsetData.methaneCaptured),
+      treesPlanted: parseInt(offsetData.treesPlanted),
+      treeType: offsetData.treeType,
+      renewableEnergy: parseFloat(offsetData.renewableEnergy),
+      ccsCaptured: parseFloat(offsetData.ccsCaptured),
+      fuelSaved: parseFloat(offsetData.fuelSaved)
+    };
+
+    // Tree type validation
+    const validTreeTypes = ['Neem', 'Teak', 'Bamboo', 'Mixed Native'];
+    if (!validTreeTypes.includes(parsedData.treeType)) {
+      return res.status(400).json({ error: 'Invalid tree species selection' });
+    }
+
+    // Calculation
+    const totalOffset = calculateTotalOffset(parsedData);
+    const carbonCredits = totalOffset;
+
+    // Database insertion
+    const [result] = await pool.query(
+      `INSERT INTO administrator_offsets (
+        administrator_id, month, year, 
+        tailings_volume, sequestration_rate, methane_captured,
+        trees_planted, tree_type, renewable_energy,
+        ccs_captured, fuel_saved, total_offset, carbon_credits
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        req.session.administrator.id,
+        parseInt(month),
+        parseInt(year),
+        parsedData.tailingsVolume,
+        parsedData.sequestrationRate,
+        parsedData.methaneCaptured,
+        parsedData.treesPlanted,
+        parsedData.treeType,
+        parsedData.renewableEnergy,
+        parsedData.ccsCaptured,
+        parsedData.fuelSaved,
+        totalOffset,
+        carbonCredits
+      ]
+    );
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
