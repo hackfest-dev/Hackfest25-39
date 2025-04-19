@@ -472,6 +472,46 @@ const emissionsUpload = multer({
     }
   }
 });
+
+
+
+
+app.get('/api/admin/check-session', (req, res) => {
+  res.json({ 
+    isAdmin: !!req.session.admin,
+    username: req.session.admin?.username 
+  });
+});
+
+
+app.get('/api/administrator/check-session', (req, res) => {
+  res.json({
+    authenticated: !!req.session.administrator,
+    administrator_id: req.session.administrator?.id,
+    mine_name: req.session.administrator?.mine_name
+  });
+});
+
+
+
+app.get('/api/sector/check-session', async (req, res) => {
+  if (!req.session.sector) return res.json({ authenticated: false });
+  try {
+    const [sector] = await pool.query(
+      'SELECT sector_id, sector_name FROM sectors WHERE sector_id = ?',
+      [req.session.sector.id]
+    );
+    if (!sector.length) return res.json({ authenticated: false });
+    res.json({
+      authenticated: true,
+      sector_id: sector[0].sector_id,
+      sector_name: sector[0].sector_name
+    });
+  } catch (error) {
+    console.error('Session check error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
