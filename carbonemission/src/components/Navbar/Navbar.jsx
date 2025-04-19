@@ -51,7 +51,7 @@ const Navbar = () => {
       if (!response.ok) throw new Error('Session check failed');
       
       const data = await response.json();
-      console.log('Sector Session Response:', data); // Add this
+      console.log('Sector Session Response:', data); 
       
       setCurrentSector(data.authenticated ? {
         id: data.sector_id,
@@ -118,10 +118,10 @@ const Navbar = () => {
       'Extraction Sector': '/extractioncalculator',
       'Overburden (OB) Removal Sector': '/obremovalcalculator',
       'Coal Processing & Handling Sector': '/processingcalculator',
-      'Coal Dispatch Sector': '/coaldispatchcalculator',  // Removed trailing space
-      'Exploration Sector': '/explorationcalculator',     // Removed trailing space
+      'Coal Dispatch Sector': '/coaldispatchcalculator',  
+      'Exploration Sector': '/explorationcalculator',     
       'Rehabilitation Sector': '/rehabilitationcalculator',
-      'Support Infrastructure Sector': '/supportinfrastructurecalculator',  // Removed leading space
+      'Support Infrastructure Sector': '/supportinfrastructurecalculator',  
     };
   
     console.log('Current Sector:', currentSector.category);
@@ -132,7 +132,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Dashboard', path: '/dashboard' },
+    // { name: 'Dashboard', path: '/dashboard' },
     ...(currentSector && getCalculatorRoute() ? [
       { 
         name: 'Calculator', 
@@ -141,7 +141,7 @@ const Navbar = () => {
       }
     ] : []),
     ...(currentSector ? [{ name: 'Sector Dashboard', path: '/sectordashboard' }] : []),
-    { name: 'Reports', path: '/reports' },
+    // { name: 'Reports', path: '/reports' },2
     { name: 'About Us', path: '/Aboutus' },
     ...(isAdminLoggedIn ? [{ name: 'Approval Requests', path: '/adminapprovals' },
       { name: 'Admin Dashboard', path: '/admindashboard' },
