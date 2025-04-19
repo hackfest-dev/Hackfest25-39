@@ -29,6 +29,8 @@ import MiningOffsetCalculator from './components/Calculators/MiningOffsetCalcula
 import CarbonCreditsDashboard from './components/CarbonCreditsDashboard/CarbonCreditsDashboard';
 import AdminOffsetDashboard from './components/AdminOffsetDashboard/AdminOffsetDashboard';
 import AdministratorOffsetDashboard from './components/AdministratorOffsetDashboard/AdministratorOffsetDashboard';
+import AdministratorMarketplace from './components/AdministratorMarketplace/AdministratorMarketplace';
+import AdminCreditManagement from './components/AdminCreditManagement/AdminCreditManagement';
 import './App.css';
 
 function App() {
@@ -44,6 +46,8 @@ function App() {
         <Route path="/administratorsignup" element={<AdministratorSignup />} />
         <Route path="/sectorlogin" element={<SectorLogin />} />
         <Route path="/carboncreditsdashboard" element={<CarbonCreditsDashboard />} />
+        <Route path="/admincreditmanagement" element={<AdminCreditManagement />} />
+        <Route path="/administratormarketplace" element={<AdministratorMarketplace />} />
 
         <Route path="/adminapprovals" element={
           <ProtectedRoute>
