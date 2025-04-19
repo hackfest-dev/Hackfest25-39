@@ -145,12 +145,16 @@ const Navbar = () => {
     { name: 'About Us', path: '/Aboutus' },
     ...(isAdminLoggedIn ? [{ name: 'Approval Requests', path: '/adminapprovals' },
       { name: 'Admin Dashboard', path: '/admindashboard' },
-    { name: 'Offset Dashboard', path:'/adminoffsetdashboard'}] : []),
+    { name: 'Offset Dashboard', path:'/adminoffsetdashboard'},  
+    { name: 'CreditManagement', path:'/admincreditmanagement'}
+  ] : []),
     
     ...(isAdministratorLoggedIn ? [{ name: 'Manage Sectors', path: '/managesectors' },
     { name: 'Administrator dashboard', path: '/administratordashboard' },
      {name: 'Offsetcalculator', path: '/miningoffsetcalculator' },
-    {name: 'Offset Dashboard', path: '/administratoroffsetdashboard'}] : []),
+    {name: 'Offset Dashboard', path: '/administratoroffsetdashboard'},
+    {name: 'Marketplace', path: '/administratormarketplace'}
+  ] : []),
   ];
 
   // Debug logging

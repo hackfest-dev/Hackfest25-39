@@ -43,8 +43,10 @@ app.use(cors({
     'http://localhost:5174/',
     'http://localhost:3000',
     'http://192.168.83.122:5173',
+    'http://172.18.6.25:5173',
     'http://192.168.137.1:5173',
-    'http://192.168.137.113:5173'
+    'http://192.168.137.113:5173',
+    'http://172.18.5.88:5173'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -1407,24 +1409,24 @@ app.get('/api/offset-pdf/:filename', async (req, res) => {
 // Get offsets for logged-in administrator
 app.get('/api/administrator/offsets', administratorAuth, async (req, res) => {
   try {
-   // In server.js, modify the administrator-offsets endpoint query
-const [offsets] = await pool.query(`
-  SELECT 
-    ao.*,
-    op.file_path AS pdf_path,
-    cc.credits_issued
-  FROM administrator_offsets ao
-  LEFT JOIN offset_pdfs op ON ao.id = op.offset_id
-  LEFT JOIN carbon_credits cc ON ao.id = cc.offset_id
-`);
-    
+    const [offsets] = await pool.query(
+      `SELECT 
+         ao.*,
+         op.file_path AS pdf_path,
+         cc.credits_issued
+       FROM administrator_offsets ao
+       LEFT JOIN offset_pdfs op ON ao.id = op.offset_id
+       LEFT JOIN carbon_credits cc ON ao.id = cc.offset_id
+       WHERE ao.administrator_id = ?
+       ORDER BY ao.year DESC, ao.month DESC`,
+      [req.session.administrator.id]
+    );
     res.json(offsets);
   } catch (error) {
+    console.error(error); // helpful for debugging
     res.status(500).json({ error: 'Failed to fetch offset data' });
   }
 });
-
-
 
 
 
@@ -1452,20 +1454,6 @@ app.get('/api/administrator/carbon-credits', administratorAuth, async (req, res)
 
 
 
-// Get administrator's offsets
-app.get('/api/administrator/offsets', administratorAuth, async (req, res) => {
-  try {
-    const [offsets] = await pool.query(
-      `SELECT * FROM administrator_offsets 
-       WHERE administrator_id = ? 
-       ORDER BY year DESC, month DESC`,
-      [req.session.administrator.id]
-    );
-    res.json(offsets);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch offset data' });
-  }
-});
 
 // Get administrator's carbon credits
 app.get('/api/administrator/carbon-credits', administratorAuth, async (req, res) => {
@@ -1512,12 +1500,392 @@ app.get('/api/administrator/total-credits', administratorAuth, async (req, res) 
 
 
 
+// ==================== Marketplace Endpoints ====================
+// Add this GET endpoint for credit price settings
+app.get('/api/admin/credit-price', adminAuth, async (req, res) => {
+  try {
+    const [settings] = await pool.query(
+      'SELECT * FROM admin_credit_settings ORDER BY year DESC, month DESC LIMIT 1'
+    );
+    res.json(settings[0] || {});
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch price settings' });
+  }
+});
+
+// Create marketplace listing
+// Modify the POST /api/marketplace/list endpoint
+app.post('/api/marketplace/list', administratorAuth, async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const { credits, price, month, year } = req.body;
+
+    // Get net available credits
+    const [available] = await connection.query(
+      `SELECT total_credits - 
+        (SELECT COALESCE(SUM(JSON_EXTRACT(emission_data, '$.total')), 0) 
+         FROM sector_emissions se
+         JOIN sectors s ON se.sector_id = s.sector_id
+         WHERE s.administrator_id = ?) AS available
+       FROM administrator_credit_totals
+       WHERE administrator_id = ?`,
+      [req.session.administrator.id, req.session.administrator.id]
+    );
+
+    if (available[0].available < credits) {
+      throw new Error('Insufficient net credits');
+    }
+
+    // Create listing
+    await connection.query(
+      `INSERT INTO marketplace_listings 
+       (administrator_id, credits_available, price_per_credit, month, year)
+       VALUES (?, ?, ?, ?, ?)`,
+      [req.session.administrator.id, credits, price, month, year]
+    );
+
+    await connection.commit();
+    res.json({ success: true });
+  } catch (error) {
+    await connection.rollback();
+    res.status(400).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// Get marketplace listings
+app.get('/api/marketplace', async (req, res) => {
+  try {
+    const [listings] = await pool.query(`
+      SELECT ml.*, a.mine_name 
+      FROM marketplace_listings ml
+      JOIN approved_administrators a ON ml.administrator_id = a.administrator_id
+      WHERE ml.status = 'active'
+    `);
+    res.json(listings);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch listings' });
+  }
+});
+
+// ==================== Admin Credit Management ====================
+
+// Set base price
+app.post('/api/admin/credit-price', adminAuth, async (req, res) => {
+  try {
+    const { month, year, price } = req.body;
+    await pool.query(
+      `INSERT INTO admin_credit_settings 
+       (month, year, base_price, updated_by)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+       base_price = VALUES(base_price),
+       updated_by = VALUES(updated_by)`,
+      [month, year, price, req.session.admin.id]
+    );
+    
+    // Return the updated settings
+    const [settings] = await pool.query(
+      'SELECT * FROM admin_credit_settings WHERE month = ? AND year = ?',
+      [month, year]
+    );
+    res.json(settings[0]);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update price' });
+  }
+});
+
+// Get all administrators credits
+// ==================== Admin Credit Overview ====================
+app.get('/api/admin/credit-overview', adminAuth, async (req, res) => {
+  try {
+    const [data] = await pool.query(`
+      SELECT 
+        a.administrator_id,
+        a.mine_name,
+        COALESCE(act.total_credits, 0) AS total_credits,
+        COALESCE(
+          (SELECT SUM(emission_data->>"$.total") 
+           FROM sector_emissions se
+           JOIN sectors s ON se.sector_id = s.sector_id
+           WHERE s.administrator_id = a.administrator_id
+             AND se.verified = 1
+          ), 0
+        ) AS emissions,
+        COALESCE(act.total_credits, 0) - COALESCE(
+          (SELECT SUM(emission_data->>"$.total") 
+           FROM sector_emissions se
+           JOIN sectors s ON se.sector_id = s.sector_id
+           WHERE s.administrator_id = a.administrator_id
+             AND se.verified = 1
+          ), 0
+        ) AS available
+      FROM approved_administrators a
+      LEFT JOIN administrator_credit_totals act 
+        ON a.administrator_id = act.administrator_id
+    `);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch credit data' });
+  }
+});
+
+// server.js - Update /api/administrator/available-credits endpoint
+// Updated /api/administrator/available-credits endpoint
+  // server.js - Available Credits Endpoint
+ // Modify the /api/administrator/available-credits endpoint
+// Update the /api/administrator/available-credits endpoint
+// ==== In server.js, after your other administratorAuth routes ====
+
+app.get('/api/administrator/available-credits', administratorAuth, async (req, res) => {
+  try {
+    const [available] = await pool.query(`
+      SELECT 
+        (
+          SELECT total_credits 
+          FROM administrator_credit_totals 
+          WHERE administrator_id = ?
+        ) 
+        - 
+        COALESCE((
+          SELECT SUM(JSON_EXTRACT(se.emission_data, '$.total'))
+          FROM sector_emissions se
+          JOIN sectors s ON se.sector_id = s.sector_id
+          WHERE s.administrator_id = ? AND se.verified = 1
+        ), 0)
+        -
+        COALESCE((
+          SELECT SUM(credits_available)
+          FROM marketplace_listings
+          WHERE administrator_id = ? AND status = 'active'
+        ), 0) AS available
+    `, [req.session.administrator.id, req.session.administrator.id, req.session.administrator.id]);
+
+    res.json({ available: Number(available[0].available.toFixed(2)) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to calculate available credits' });
+  }
+});
+
+
+// server.js - Add new endpoint
+app.get('/api/admin/net-credits', adminAuth, async (req, res) => {
+  try {
+    const [data] = await pool.query(`
+      SELECT 
+        a.administrator_id,
+        a.mine_name,
+        COALESCE(act.total_credits, 0) AS total_credits,
+        COALESCE(
+          (SELECT SUM(JSON_EXTRACT(emission_data, '$.total')) 
+          FROM sector_emissions se
+          JOIN sectors s ON se.sector_id = s.sector_id
+          WHERE s.administrator_id = a.administrator_id
+        ), 0) / 1000 AS emissions,
+        COALESCE(act.total_credits, 0) - 
+        (COALESCE(
+          (SELECT SUM(JSON_EXTRACT(emission_data, '$.total')) 
+          FROM sector_emissions se
+          JOIN sectors s ON se.sector_id = s.sector_id
+          WHERE s.administrator_id = a.administrator_id
+        ), 0) / 1000) AS net_available
+      FROM approved_administrators a
+      LEFT JOIN administrator_credit_totals act 
+        ON a.administrator_id = act.administrator_id
+    `);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch net credits' });
+  }
+});
+
+
+// Add this endpoint for credit-emission reconciliation
+app.get('/api/administrator/net-credits', administratorAuth, async (req, res) => {
+  try {
+    const [credits] = await pool.query(
+      `SELECT COALESCE(SUM(credits_issued), 0) AS total_credits
+       FROM carbon_credits 
+       WHERE administrator_id = ?`,
+      [req.session.administrator.id]
+    );
+
+    const [emissions] = await pool.query(
+      `SELECT COALESCE(SUM(JSON_EXTRACT(emission_data, '$.total') / 1000, 0) AS emissions
+       FROM sector_emissions se
+       JOIN sectors s ON se.sector_id = s.sector_id
+       WHERE s.administrator_id = ?`,
+      [req.session.administrator.id]
+    );
+
+    const netCredits = credits[0].total_credits - emissions[0].emissions;
+    res.json({ net_credits: Math.max(netCredits, 0) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to calculate net credits' });
+  }
+});
+
+
+app.get('/api/administrator/available-credentials', administratorAuth, async (req, res) => {
+  try {
+    const [credits] = await pool.query(
+      `SELECT 
+          COALESCE(act.total_credits, 0) -
+          COALESCE((
+              SELECT SUM(JSON_EXTRACT(se.emission_data, '$.total')) 
+              FROM sector_emissions se
+              JOIN sectors s ON se.sector_id = s.sector_id 
+              WHERE s.administrator_id = ? AND se.verified = 1
+          ), 0) AS available
+       FROM administrator_credit_totals act
+       WHERE act.administrator_id = ?`,
+      [req.session.administrator.id, req.session.administrator.id]
+    );
+    res.json({ available: credits[0].available || 0 });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch available credits' });
+  }
+});
 
 
 
 
+// ==== Marketplace ====
 
+// GET all active listings
+app.get('/api/marketplace', administratorAuth, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT ml.id,
+              ml.administrator_id,
+              ml.credits_available,
+              ml.price_per_credit,
+              ml.month,
+              ml.year,
+              ml.created_at,
+              a.mine_name
+       FROM marketplace_listings ml
+       JOIN approved_administrators a
+         ON ml.administrator_id = a.administrator_id
+       WHERE ml.status = 'active'
+       ORDER BY ml.created_at DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch listings' });
+  }
+});
 
+// POST a new listing (sell credits)
+app.post('/api/marketplace/list', administratorAuth, async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const { credits, price, month, year } = req.body;
+
+    // 1. Check available credits (including active listings)
+    const [available] = await connection.query(`
+      SELECT ... (same as modified available-credits query above)
+    `, [req.session.administrator.id, req.session.administrator.id, req.session.administrator.id]);
+
+    if (available[0].available < credits) {
+      throw new Error('Insufficient net credits');
+    }
+
+    // 2. Create listing
+    await connection.query(
+      `INSERT INTO marketplace_listings (...) VALUES (...)`,
+      [req.session.administrator.id, credits, price, month, year]
+    );
+
+    await connection.commit();
+    res.json({ success: true });
+  } catch (error) {
+    await connection.rollback();
+    res.status(400).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// POST purchase of a listing
+app.post('/api/marketplace/purchase/:listingId', administratorAuth, async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const { amount } = req.body;
+    const buyerId = req.session.administrator.id;
+    const listingId = req.params.listingId;
+
+    // 1) Fetch the listing details including the seller's ID
+    const [[listing]] = await connection.query(
+      `SELECT 
+          ml.administrator_id AS seller_id,
+          ml.credits_available,
+          ml.price_per_credit
+       FROM marketplace_listings ml
+       WHERE ml.id = ? AND ml.status = 'active'`,
+      [listingId]
+    );
+    if (!listing) throw new Error('Listing not found');
+    if (listing.credits_available < amount) throw new Error('Not enough credits in listing');
+
+    // 2) Deduct credits from seller
+    const [sellerCredits] = await connection.query(
+      `SELECT total_credits FROM administrator_credit_totals WHERE administrator_id = ?`,
+      [listing.seller_id]
+    );
+    if (!sellerCredits.length || sellerCredits[0].total_credits < amount) {
+      throw new Error('Seller does not have enough total credits');
+    }
+
+    await connection.query(
+      `UPDATE administrator_credit_totals
+       SET total_credits = total_credits - ?
+       WHERE administrator_id = ?`,
+      [amount, listing.seller_id]
+    );
+
+    // 3) Add credits to buyer (insert or update)
+    await connection.query(
+      `INSERT INTO administrator_credit_totals (administrator_id, total_credits)
+       VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE total_credits = total_credits + ?`,
+      [buyerId, amount, amount]
+    );
+
+    // 4) Update the listing (deduct credits and change status if needed)
+    await connection.query(
+      `UPDATE marketplace_listings
+       SET credits_available = credits_available - ?,
+           status = IF(credits_available - ? <= 0, 'sold', 'active')
+       WHERE id = ?`,
+      [amount, amount, listingId]
+    );
+
+    // 5) Log the transaction
+    const totalAmount = amount * listing.price_per_credit;
+    await connection.query(
+      `INSERT INTO credit_transactions
+       (listing_id, buyer_id, credits_purchased, total_amount)
+       VALUES (?, ?, ?, ?)`,
+      [listingId, buyerId, amount, totalAmount]
+    );
+
+    await connection.commit();
+    res.json({ success: true });
+  } catch (err) {
+    await connection.rollback();
+    console.error('Purchase error:', err.message);
+    res.status(400).json({ error: err.message });
+  } finally {
+    connection.release();
+  }
+});
 
 
 // Error handling middleware at the end
@@ -1532,7 +1900,4 @@ app.use((req, res) => {
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
-
-
-
 
