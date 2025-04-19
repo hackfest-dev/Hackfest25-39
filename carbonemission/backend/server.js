@@ -688,6 +688,42 @@ function calculateTotalOffset(data) {
 
   return Number(components.reduce((sum, val) => sum + val, 0).toFixed(2));
 }
+
+// ==================== Dashboard Endpoints ====================
+// Get all offsets for administrator
+app.get('/api/administrator/offsets', administratorAuth, async (req, res) => {
+  try {
+    const [offsets] = await pool.query(`
+      SELECT 
+        ao.*,
+        op.file_path AS pdf_path,
+        cc.credits_issued
+      FROM administrator_offsets ao
+      LEFT JOIN offset_pdfs op ON ao.id = op.offset_id
+      LEFT JOIN carbon_credits cc ON ao.id = cc.offset_id
+      WHERE ao.administrator_id = ?
+      ORDER BY ao.year DESC, ao.month DESC`,
+      [req.session.administrator.id]
+    );
+    res.json(offsets);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch offset data' });
+  }
+});
+
+// Get total credits
+app.get('/api/administrator/total-credits', administratorAuth, async (req, res) => {
+  try {
+    const [total] = await pool.query(
+      'SELECT total_credits FROM administrator_credit_totals WHERE administrator_id = ?',
+      [req.session.administrator.id]
+    );
+    res.json({ total: total.length ? Number(total[0].total_credits) : 0 });
+  } catch (error) {
+    console.error('Total credits error:', error);
+    res.status(500).json({ error: 'Failed to fetch credit total' });
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
