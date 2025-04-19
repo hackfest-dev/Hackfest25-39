@@ -38,6 +38,10 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
+
+const administratorAuth = (req, res, next) => {
+  req.session.administrator ? next() : res.status(401).json({ error: 'Administrator authorization required' });
+};
 // ============ MULTER ============
 const upload = multer({ storage: multer.memoryStorage() });
 
