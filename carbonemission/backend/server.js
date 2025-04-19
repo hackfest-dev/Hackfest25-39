@@ -482,6 +482,15 @@ app.get('/api/admin/check-session', (req, res) => {
     username: req.session.admin?.username 
   });
 });
+
+
+app.get('/api/administrator/check-session', (req, res) => {
+  res.json({
+    authenticated: !!req.session.administrator,
+    administrator_id: req.session.administrator?.id,
+    mine_name: req.session.administrator?.mine_name
+  });
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
