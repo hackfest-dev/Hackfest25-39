@@ -512,6 +512,32 @@ app.get('/api/sector/check-session', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
+
+// ==================== Offset Configuration ====================
+const offsetStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, 'uploads', 'offsets');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `offset-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const offsetUpload = multer({ 
+  storage: offsetStorage,
+  fileFilter: (req, file, cb) => {
+    if (path.extname(file.originalname).toLowerCase() === '.pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
