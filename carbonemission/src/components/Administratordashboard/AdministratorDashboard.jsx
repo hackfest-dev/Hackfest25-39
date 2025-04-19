@@ -90,6 +90,61 @@ const AdministratorDashboard = () => {
     }
   };
 
+
+  const handleMonthlySubmit = async (month, year) => {
+    if (!selectedFile) {
+      setError('Please select a PDF file to submit');
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('report', selectedFile);
+    formData.append('month', month);
+    formData.append('year', year);
+  
+    try {
+      const response = await fetch(`${apiBaseURL}/api/emissions/submit-monthly`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+  
+      if (!response.ok) throw new Error('Submission failed');
+  
+      // Refresh submitted reports
+      const reportsResponse = await fetch(
+        `${apiBaseURL}/api/monthly-reports/${administratorInfo.id}`, 
+        { credentials: 'include' }
+      );
+      const reportsData = await reportsResponse.json();
+      setSubmittedReports(reportsData);
+  
+      setSelectedFile(null);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    const loadSubmittedReports = async () => {
+      if (!administratorInfo?.id) return;
+      
+      try {
+        const response = await fetch(
+          `${apiBaseURL}/api/monthly-reports/${administratorInfo.id}`,
+          { credentials: 'include' }
+        );
+        const data = await response.json();
+        setSubmittedReports(data);
+      } catch (err) {
+        console.error('Failed to load reports:', err);
+      }
+    };
+  
+    loadSubmittedReports();
+  }, [administratorInfo?.id]);
+  
   const handleRejectEmission = async (entryId) => {
     if (!window.confirm('Are you sure you want to reject and delete this emission entry?')) return;
   
