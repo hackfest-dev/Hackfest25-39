@@ -253,6 +253,95 @@ app.post('/api/manage-sectors', administratorAuth, async (req, res) => {
 });
 
 
+
+
+// ==================== Sector Dashboard Endpoints ====================
+// Sector login
+app.post('/api/sector-login', async (req, res) => {
+  try {
+    const { sector_id, sector_email, password } = req.body;
+    
+    const [sector] = await pool.query(
+      'SELECT * FROM sectors WHERE sector_id = ? AND sector_email = ?',
+      [sector_id, sector_email]
+    );
+
+    if (!sector.length) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!sector[0].sector_password) {
+      return res.status(401).json({ 
+        error: 'Password not set', 
+        needsPasswordSetup: true 
+      });
+    }
+
+    const isValid = await bcrypt.compare(password, sector[0].sector_password);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    req.session.sector = {
+      id: sector[0].sector_id,
+      email: sector[0].sector_email
+    };
+
+    res.json({ message: 'Login successful' });
+  } catch (error) {
+    console.error('Sector login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Submit emission data
+app.post('/api/emissions/store', emissionsUpload.single('pdf'), async (req, res) => {
+  try {
+    const { sector_id, sector_type, month, year, inputs, emissions } = req.body;
+    
+    const [existing] = await pool.query(
+      `SELECT id FROM sector_emissions 
+       WHERE sector_id = ? AND month = ? AND year = ?`,
+      [sector_id, parseInt(month), parseInt(year)]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ 
+        error: 'A submission already exists for this month and year' 
+      });
+    }
+
+    if (!sector_id || !sector_type || !month || !year || !inputs || !emissions) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    let pdfPath = null;
+    if (req.file) {
+      pdfPath = req.file.filename;
+    }
+
+    await pool.query(
+      `INSERT INTO sector_emissions 
+      (sector_id, sector_type, month, year, input_data, emission_data, pdf_path)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        sector_id,
+        sector_type,
+        parseInt(month),
+        parseInt(year),
+        JSON.stringify(inputs),
+        JSON.stringify(emissions),
+        pdfPath
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Storage error:', error);
+    if (req.file) fs.unlinkSync(req.file.path);
+    res.status(500).json({ error: 'Data storage failed' });
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
