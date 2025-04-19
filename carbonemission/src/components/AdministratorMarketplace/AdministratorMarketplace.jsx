@@ -7,34 +7,42 @@ const AdministratorMarketplace = () => {
   const [formData, setFormData] = useState({ credits: '', price: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const apiBaseURL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000' 
     : `http://${window.location.hostname}:5000`;
 
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const [creditsRes, listingsRes] = await Promise.all([
-              fetch(`${apiBaseURL}/api/administrator/available-credits`, { 
-                credentials: 'include' 
-              }),
-              fetch(`${apiBaseURL}/api/marketplace`, { credentials: 'include' })
-            ]);
-            
-            const creditsData = await creditsRes.json();
-            const listingsData = await listingsRes.json();
-            
-            setAvailableCredits(creditsData.available);
-            setListings(listingsData);
-            setLoading(false);
-          } catch (err) {
-            setError('Failed to load marketplace data');
-            setLoading(false);
-          }
-        };
-        fetchData();
-      }, []);
+    // Modify the useEffect to handle errors
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const creditsRes = await fetch(`${apiBaseURL}/api/administrator/available-credits`, { 
+          credentials: 'include' 
+        });
+        
+        if (!creditsRes.ok) throw new Error('Credits data unavailable');
+        
+        const creditsData = await creditsRes.json();
+        setAvailableCredits(creditsData.available || 0);
+  
+        const listingsRes = await fetch(`${apiBaseURL}/api/marketplace`, { 
+          credentials: 'include' 
+        });
+        
+        if (!listingsRes.ok) throw new Error('Listings unavailable');
+        
+        const listingsData = await listingsRes.json();
+        setListings(listingsData);
+  
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setAvailableCredits(0);
+        setListings([]);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleSellCredits = async (e) => {
     e.preventDefault();
@@ -70,14 +78,15 @@ const AdministratorMarketplace = () => {
     <div className="admin-dashboard">
       <div className="admin-header">
         <h2>Carbon Credit Marketplace</h2>
-        <div className="credits-summary">
-          <div className="available-credits">
-            <h3>Available Credits</h3>
-            <div className="credits-value">
-              {availableCredits.toFixed(2)} tCO₂e
-            </div>
-          </div>
-        </div>
+        // AdministratorMarketplace.jsx - Add net credits display
+<div className="credits-summary">
+  <div className="available-credits">
+    <h3>Net Available Credits</h3>
+    <div className="credits-value">
+  {availableCredits?.toFixed?.(2) || '0.00'} tCO₂e
+</div>
+  </div>
+</div>
       </div>
 
       <div className="marketplace-content">
