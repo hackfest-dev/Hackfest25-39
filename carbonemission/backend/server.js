@@ -472,6 +472,16 @@ const emissionsUpload = multer({
     }
   }
 });
+
+
+
+
+app.get('/api/admin/check-session', (req, res) => {
+  res.json({ 
+    isAdmin: !!req.session.admin,
+    username: req.session.admin?.username 
+  });
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
