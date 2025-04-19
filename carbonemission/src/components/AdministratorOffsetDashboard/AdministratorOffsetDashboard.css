@@ -1,0 +1,86 @@
+.admin-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+  margin-top: 7%;
+  }
+
+  .administrator-dashboard{
+    margin-top: 7%;
+  }
+  
+  .admin-status.verified {
+    background-color: #27ae60;
+    color: white;
+  }
+  
+  .admin-status.pending {
+    background-color: #f1c40f;
+    color: #2c3e50;
+  }
+  
+  .offset-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .detail-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .detail-item span:first-child {
+    font-weight: 500;
+    color: #7f8c8d;
+    margin-bottom: 0.5rem;
+  }
+  
+  .detail-item span:last-child {
+    font-size: 1.1rem;
+    color: #2c3e50;
+  }
+
+
+  .carbon-credits-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .credits-table {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .table-header {
+    font-weight: 600;
+    color: #2c3e50;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #ecf0f1;
+  }
+  
+  .credit-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #ecf0f1;
+    display: contents;
+  }
+  
+  .credit-item > span {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .credits-amount {
+    color: #27ae60;
+    font-weight: 500;
+  }
