@@ -737,6 +737,42 @@ app.get('/api/offset-pdf/:filename', async (req, res) => {
   }
 });
 
+
+// Admin verification
+app.put('/api/admin/verify-offset/:id', adminAuth, async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [result] = await connection.query(
+      `UPDATE administrator_offsets 
+       SET verified = 1, verified_by = ?, verified_at = NOW()
+       WHERE id = ?`,
+      [req.session.admin.id, req.params.id]
+    );
+    if (result.affectedRows === 0) throw new Error('Offset not found');
+    const [offset] = await connection.query(
+      'SELECT administrator_id, total_offset FROM administrator_offsets WHERE id = ?',
+      [req.params.id]
+    );
+    await connection.query(
+      `INSERT INTO carbon_credits 
+       (administrator_id, offset_id, credits_issued)
+       VALUES (?, ?, ?)`,
+      [offset[0].administrator_id, req.params.id, offset[0].total_offset]
+    );
+    await connection.commit();
+    res.json({ 
+      success: true,
+      creditsIssued: offset[0].total_offset,
+      verifiedBy: req.session.admin.username
+    });
+  } catch (error) {
+    await connection.rollback();
+    res.status(500).json({ error: 'Verification failed: ' + error.message });
+  } finally {
+    connection.release();
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
