@@ -166,10 +166,17 @@ const AdminOffsetDashboard = () => {
             .map(entry => (
               <div key={entry.id} className="admin-month-card">
                 <div className="admin-card-header">
+
+                <div className="admin-mine-info">
+                  <h3 className="admin-mine-id">
+                    Mine Administrator ID: {entry.administrator_id}
+                  </h3>
                   <h3 className="admin-month-title">
                     {new Date(entry.year, entry.month - 1)
                       .toLocaleString('default', { month: 'long', year: 'numeric' })}
                   </h3>
+                </div>
+                  
                   <div className="admin-total-emission">
                     <span>Total Offset: {entry.total_offset?.toFixed(2) || '0.00'} tonnes CO₂e</span>
                     <div className="admin-submission-status">
