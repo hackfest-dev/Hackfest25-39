@@ -648,6 +648,46 @@ app.post('/api/offset/store', administratorAuth, offsetUpload.single('pdf'), asy
     res.status(500).json({ error: 'Failed to store offset data' });
   }
 });
+
+
+
+// ==================== Offset Calculation Formula ====================
+function calculateTotalOffset(data) {
+  const INDIA_CONSTANTS = {
+    gridEF: 0.00082,         // kgCO2/kWh
+    methaneDensity: 0.716,    // kg/m³
+    methaneGWP: 28,           // Global Warming Potential
+    dieselEF: 2.68,           // kgCO2/liter
+    treeSpecies: {
+      'Neem': 0.035 / 12,     // Monthly sequestration (tons/month)
+      'Teak': 0.040 / 12,
+      'Bamboo': 0.025 / 12,
+      'Mixed Native': 0.030 / 12
+    }
+  };
+
+  const components = [
+    // Tailings management
+    data.tailingsVolume * data.sequestrationRate,
+    
+    // Methane capture
+    (data.methaneCaptured * INDIA_CONSTANTS.methaneDensity * INDIA_CONSTANTS.methaneGWP) / 1000,
+    
+    // Afforestation
+    data.treesPlanted * INDIA_CONSTANTS.treeSpecies[data.treeType],
+    
+    // Renewable energy
+    data.renewableEnergy * INDIA_CONSTANTS.gridEF,
+    
+    // Carbon capture
+    data.ccsCaptured,
+    
+    // Fuel savings
+    data.fuelSaved * INDIA_CONSTANTS.dieselEF / 1000
+  ];
+
+  return Number(components.reduce((sum, val) => sum + val, 0).toFixed(2));
+}
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
