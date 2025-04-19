@@ -634,6 +634,20 @@ app.post('/api/offset/store', administratorAuth, offsetUpload.single('pdf'), asy
         carbonCredits
       ]
     );
+
+    
+    // Store PDF reference
+    await pool.query(
+      'INSERT INTO offset_pdfs (offset_id, file_path) VALUES (?, ?)',
+      [result.insertId, req.file.filename]
+    );
+
+    res.json({ success: true, totalOffset, carbonCredits });
+  } catch (error) {
+    console.error('Offset storage error:', error);
+    res.status(500).json({ error: 'Failed to store offset data' });
+  }
+});
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
