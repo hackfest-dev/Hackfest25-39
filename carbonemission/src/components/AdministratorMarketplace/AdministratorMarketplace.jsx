@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// import './AdministratorDashboard.css';
 
 const AdministratorMarketplace = () => {
   const [listings, setListings] = useState([]);
@@ -7,40 +6,41 @@ const AdministratorMarketplace = () => {
   const [formData, setFormData] = useState({ credits: '', price: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const apiBaseURL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000' 
+  const apiBaseURL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
     : `http://${window.location.hostname}:5000`;
 
-    // Modify the useEffect to handle errors
-useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const creditsRes = await fetch(`${apiBaseURL}/api/administrator/available-credits`, { 
-          credentials: 'include' 
-        });
-        
-        if (!creditsRes.ok) throw new Error('Credits data unavailable');
-        
-        const creditsData = await creditsRes.json();
-        setAvailableCredits(creditsData.available || 0);
-  
-        const listingsRes = await fetch(`${apiBaseURL}/api/marketplace`, { 
-          credentials: 'include' 
-        });
-        
-        if (!listingsRes.ok) throw new Error('Listings unavailable');
-        
-        const listingsData = await listingsRes.json();
-        setListings(listingsData);
-  
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setAvailableCredits(0);
-        setListings([]);
-        setLoading(false);
-      }
-    };
+  // Helper to fetch available credits
+  const fetchAvailableCredits = async () => {
+    const creditsRes = await fetch(`${apiBaseURL}/api/administrator/available-credits`, {
+      credentials: 'include'
+    });
+    if (!creditsRes.ok) throw new Error('Credits data unavailable');
+    const creditsData = await creditsRes.json();
+    setAvailableCredits(creditsData.available || 0);
+  };
+
+  // Fetch listings and credits
+  const fetchData = async () => {
+    try {
+      await fetchAvailableCredits();
+
+      const listingsRes = await fetch(`${apiBaseURL}/api/marketplace`, {
+        credentials: 'include'
+      });
+      if (!listingsRes.ok) throw new Error('Listings unavailable');
+      const listingsData = await listingsRes.json();
+      setListings(listingsData);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setListings([]);
+      setAvailableCredits(0);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -58,14 +58,28 @@ useEffect(() => {
           year: new Date().getFullYear()
         })
       });
-      
       if (!response.ok) throw new Error('Failed to list credits');
-      
-      // Refresh data
-      const newListings = await fetch(`${apiBaseURL}/api/marketplace`);
-      setListings(await newListings.json());
+
+      // Refresh both listings and credits immediately
+      await fetchData();
       setFormData({ credits: '', price: '' });
-      
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handlePurchase = async (listingId, amount) => {
+    try {
+      const response = await fetch(`${apiBaseURL}/api/marketplace/purchase/${listingId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ amount })
+      });
+      if (!response.ok) throw new Error('Purchase failed');
+
+      // Refresh both listings and credits
+      await fetchData();
     } catch (err) {
       setError(err.message);
     }
@@ -78,15 +92,14 @@ useEffect(() => {
     <div className="admin-dashboard">
       <div className="admin-header">
         <h2>Carbon Credit Marketplace</h2>
-        // AdministratorMarketplace.jsx - Add net credits display
-<div className="credits-summary">
-  <div className="available-credits">
-    <h3>Net Available Credits</h3>
-    <div className="credits-value">
-  {availableCredits?.toFixed?.(2) || '0.00'} tCO₂e
-</div>
-  </div>
-</div>
+        <div className="credits-summary">
+          <div className="available-credits">
+            <h3>Net Available Credits</h3>
+            <div className="credits-value">
+              {availableCredits.toFixed(2)} tCO₂e
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="marketplace-content">
@@ -98,7 +111,7 @@ useEffect(() => {
               type="number"
               step="0.01"
               value={formData.credits}
-              onChange={(e) => setFormData({...formData, credits: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, credits: e.target.value })}
               required
             />
           </div>
@@ -108,7 +121,7 @@ useEffect(() => {
               type="number"
               step="0.01"
               value={formData.price}
-              onChange={(e) => setFormData({...formData, price: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               required
             />
           </div>
@@ -117,7 +130,7 @@ useEffect(() => {
           </button>
           <div className="form-limits">
             <span>Available: {availableCredits.toFixed(2)} tCO₂e</span>
-            {formData.credits > availableCredits && (
+            {parseFloat(formData.credits) > availableCredits && (
               <span className="form-error">
                 Cannot list more credits than available!
               </span>
@@ -138,7 +151,10 @@ useEffect(() => {
                   <p>Available: {listing.credits_available} tCO₂e</p>
                   <p>Listed: {new Date(listing.created_at).toLocaleDateString()}</p>
                 </div>
-                <button className="admin-submit-button">
+                <button
+                  className="admin-submit-button"
+                  onClick={() => handlePurchase(listing.id, listing.credits_available)}
+                >
                   Purchase Credits
                 </button>
               </div>
