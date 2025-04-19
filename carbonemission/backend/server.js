@@ -724,6 +724,19 @@ app.get('/api/administrator/total-credits', administratorAuth, async (req, res) 
     res.status(500).json({ error: 'Failed to fetch credit total' });
   }
 });
+
+// PDF serving
+app.get('/api/offset-pdf/:filename', async (req, res) => {
+  try {
+    const filePath = path.join(__dirname, 'uploads', 'offsets', req.params.filename);
+    if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.sendFile(filePath);
+  } catch (error) {
+    res.status(500).json({ error: 'Error retrieving PDF' });
+  }
+});
+
 // ============ START SERVER ============
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
