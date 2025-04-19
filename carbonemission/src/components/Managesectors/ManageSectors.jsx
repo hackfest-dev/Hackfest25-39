@@ -110,90 +110,90 @@ const ManageSectors = () => {
 // };
 
   // Update the JSX structure with new class names
-return (
-  <div className="ms-container">
-    <h2>Manage Mine Sectors</h2>
-    
-    <form onSubmit={handleSubmit} className="ms-form">
-      <div className="ms-form-grid">
-        <div className="ms-form-group">
-          <label>Sector ID:</label>
-          <input
-            type="text"
-            value={formData.sector_id}
-            onChange={(e) => setFormData({ ...formData, sector_id: e.target.value })}
-            placeholder="Enter unique sector ID"
-          />
+  return (
+    <div className="manage-sectors-container">
+      <h2 className="manage-sectors-title">Manage Mine Sectors</h2>
+      
+      <form onSubmit={handleSubmit} className="manage-sectors-form">
+        <div className="manage-sectors-form-grid">
+          <div className="manage-sectors-form-group">
+            <label>Sector ID:</label>
+            <input
+              type="text"
+              value={formData.sector_id}
+              onChange={(e) => setFormData({ ...formData, sector_id: e.target.value })}
+              placeholder="Enter unique sector ID"
+            />
+          </div>
+
+          <div className="manage-sectors-form-group">
+            <label>Sector Category:</label>
+            <select
+              value={formData.sector_category}
+              onChange={(e) => setFormData({ ...formData, sector_category: e.target.value })}
+            >
+              <option value="">Select Category</option>
+              {sectorCategories.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="manage-sectors-form-group">
+            <label>Sector Email:</label>
+            <input
+              type="email"
+              value={formData.sector_email}
+              onChange={(e) => setFormData({ ...formData, sector_email: e.target.value })}
+              placeholder="Enter sector email"
+            />
+          </div>
         </div>
 
-        <div className="ms-form-group">
-          <label>Sector Category:</label>
-          <select
-            value={formData.sector_category}
-            onChange={(e) => setFormData({ ...formData, sector_category: e.target.value })}
-          >
-            <option value="">Select Category</option>
-            {sectorCategories.map((category) => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-        </div>
+        {error && <div className="manage-sectors-alert manage-sectors-alert-error">{error}</div>}
+        {success && <div className="manage-sectors-alert manage-sectors-alert-success">{success}</div>}
 
-        <div className="ms-form-group">
-          <label>Sector Email:</label>
-          <input
-            type="email"
-            value={formData.sector_email}
-            onChange={(e) => setFormData({ ...formData, sector_email: e.target.value })}
-            placeholder="Enter sector email"
-          />
-        </div>
-      </div>
+        <button type="submit" className="manage-sectors-submit">
+          Create Sector
+        </button>
+      </form>
 
-      {error && <div className="ms-message ms-error-message">{error}</div>}
-      {success && <div className="ms-message ms-success-message">{success}</div>}
-
-      <button type="submit" className="ms-submit-btn">
-        Create Sector
-      </button>
-    </form>
-
-    <div className="ms-sectors-list">
-      <h3>Existing Sectors</h3>
-      {sectors.length === 0 ? (
-        <p>No sectors created yet</p>
-      ) : (
-        <table className="ms-table">
-          <thead>
-            <tr>
-              <th>Sector ID</th>
-              <th>Category</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sectors.map((sector) => (
-              <tr key={sector.sector_id}>
-                <td>{sector.sector_id}</td>
-                <td>{sector.sector_name}</td>
-                <td>{sector.sector_email}</td>
-                <td>
-                  <button 
-                    onClick={() => handleDelete(sector.sector_id)}
-                    className="ms-delete-btn"
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="manage-sectors-list">
+        <h3 className="manage-sectors-list-title">Existing Sectors</h3>
+        {sectors.length === 0 ? (
+          <p className="manage-sectors-empty">No sectors created yet</p>
+        ) : (
+          <table className="manage-sectors-table">
+            <thead>
+              <tr>
+                <th>Sector ID</th>
+                <th>Category</th>
+                <th>Email</th>
+                {/* <th>Actions</th> */}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {sectors.map((sector) => (
+                <tr key={sector.sector_id}>
+                  <td>{sector.sector_id}</td>
+                  <td>{sector.sector_name}</td>
+                  <td>{sector.sector_email}</td>
+                  {/* <td>
+                    <button 
+                      onClick={() => handleDelete(sector.sector_id)}
+                      className="manage-sectors-delete-btn"
+                    >
+                      Delete
+                    </button>
+                  </td> */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default ManageSectors;
