@@ -90,6 +90,26 @@ const ManageSectors = () => {
 
 
 
+// Add to the existing code in ManageSectors.jsx
+// const handleDelete = async (sectorId) => {
+//   if (!window.confirm('Are you sure you want to delete this sector?')) return;
+
+//   try {
+//     const response = await fetch(`${apiBaseURL}/api/manage-sectors/${sectorId}`, {
+//       method: 'DELETE',
+//       credentials: 'include'
+//     });
+    
+//     if (!response.ok) throw new Error('Delete failed');
+    
+//     setSectors(sectors.filter(s => s.sector_id !== sectorId));
+//     setSuccess('Sector deleted');
+//   } catch (err) {
+//     setError(err.message);
+//   }
+// };
+
+  // Update the JSX structure with new class names
 return (
   <div className="ms-container">
     <h2>Manage Mine Sectors</h2>

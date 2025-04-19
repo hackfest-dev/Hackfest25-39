@@ -1,0 +1,146 @@
+/* Admin Dashboard Specific Styles */
+.ad-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 7%;
+}
+
+.ad-heading {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.ad-chart-section {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+}
+
+.ad-report-list {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.ad-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  overflow-x: auto;
+}
+
+.ad-table thead {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.ad-table th,
+.ad-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ad-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.ad-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.ad-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.ad-badge.verified {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.ad-badge.unverified {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.ad-action-btn {
+  padding: 0.6rem 1.2rem;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ad-action-btn:hover {
+  background: #357abd;
+  transform: translateY(-1px);
+}
+
+.ad-action-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.ad-pdf-link {
+  color: #4a90e2;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.ad-pdf-link:hover {
+  background: #e8f1fd;
+  text-decoration: underline;
+}
+
+.ad-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+}
+
+.ad-error {
+  background: #ffe3e3;
+  color: #dc3545;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .ad-container {
+    padding: 1rem;
+  }
+  
+  .ad-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .ad-table th,
+  .ad-table td {
+    min-width: 150px;
+  }
+  
+  .ad-chart-section,
+  .ad-report-list {
+    padding: 1.5rem;
+  }
+}

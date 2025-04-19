@@ -138,4 +138,6 @@
 
   .nav-logo{
     border-radius: 50%;
+    min-height: 70px;
+    min-width: 70px;
   }
