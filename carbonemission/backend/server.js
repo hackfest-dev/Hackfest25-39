@@ -42,6 +42,8 @@ app.use(session({
 const administratorAuth = (req, res, next) => {
   req.session.administrator ? next() : res.status(401).json({ error: 'Administrator authorization required' });
 };
+
+
 // ============ MULTER ============
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -444,6 +446,30 @@ app.post('/api/emissions/submit-monthly', administratorAuth, monthlyUpload.singl
   } catch (error) {
     console.error('Monthly submission error:', error);
     res.status(500).json({ error: 'Monthly report submission failed' });
+  }
+});
+
+
+const emissionsStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, 'uploads', 'emissions');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `emission-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const emissionsUpload = multer({ 
+  storage: emissionsStorage,
+  fileFilter: (req, file, cb) => {
+    if (path.extname(file.originalname).toLowerCase() === '.pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
   }
 });
 // ============ START SERVER ============
